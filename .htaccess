@@ -1,0 +1,15 @@
+Options -Indexes
+RewriteEngine On
+
+# Route /api/* → api/index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^api/(.*)$ api/index.php [QSA,L]
+
+# /admin/* served directly as PHP files (no rewrite needed)
+RewriteCond %{REQUEST_URI} ^/admin
+RewriteRule ^ - [L]
+
+# Everything else → landing page
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
