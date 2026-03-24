@@ -36,7 +36,10 @@ class DB {
     public static function insert(string $sql, array $params = []): string {
         $stmt = self::get()->prepare($sql);
         $stmt->execute($params);
-        $row = $stmt->fetch();
-        return (string) ($row['id'] ?? self::get()->lastInsertId());
+        if (stripos($sql, 'RETURNING') !== false) {
+            $row = $stmt->fetch();
+            return $row ? (string) reset($row) : '';
+        }
+        return (string) self::get()->lastInsertId();
     }
 }

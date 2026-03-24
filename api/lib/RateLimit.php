@@ -34,8 +34,8 @@ class RateLimit {
         $row = DB::find('SELECT attempts, expires_at FROM rate_limits WHERE id_hash = ?', [$hash]);
 
         if (!$row) {
-            DB::insert(
-                'INSERT INTO rate_limits (id_hash, attempts, expires_at) VALUES (?, 1, ?) RETURNING id_hash',
+            DB::query(
+                'INSERT INTO rate_limits (id_hash, attempts, expires_at) VALUES (?, 1, ?)',
                 [$hash, $now + $window]
             );
             return;
