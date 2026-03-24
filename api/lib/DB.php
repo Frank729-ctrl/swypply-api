@@ -6,24 +6,11 @@ class DB {
 
     public static function get(): PDO {
         if (!self::$pdo) {
-            // Supabase / Railway provide a full DATABASE_URL
-            if (DATABASE_URL) {
-                $p   = parse_url(DATABASE_URL);
-                $dsn = sprintf(
-                    'pgsql:host=%s;port=%s;dbname=%s',
-                    $p['host'],
-                    $p['port'] ?? 5432,
-                    ltrim($p['path'], '/')
-                );
-                $user = $p['user'] ?? '';
-                $pass = $p['pass'] ?? '';
-            } else {
-                $dsn  = sprintf('pgsql:host=%s;port=%s;dbname=%s', DB_HOST, DB_PORT, DB_NAME);
-                $user = DB_USER;
-                $pass = DB_PASS;
-            }
-
-            self::$pdo = new PDO($dsn, $user, $pass, [
+            $dsn = sprintf(
+                'pgsql:host=%s;port=%s;dbname=%s;sslmode=require',
+                DB_HOST, DB_PORT, DB_NAME
+            );
+            self::$pdo = new PDO($dsn, DB_USER, DB_PASS, [
                 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             ]);
@@ -47,7 +34,6 @@ class DB {
     }
 
     public static function insert(string $sql, array $params = []): string {
-        // PostgreSQL needs RETURNING id to get last insert id
         $stmt = self::get()->prepare($sql);
         $stmt->execute($params);
         $row = $stmt->fetch();
