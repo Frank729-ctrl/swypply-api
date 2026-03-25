@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../lib/DB.php';
 require_once __DIR__ . '/../lib/Response.php';
 require_once __DIR__ . '/../middleware/auth.php';
+require_once __DIR__ . '/../mail/MailService.php';
 require_once __DIR__ . '/../../config.php';
 
 class SubscriptionController {
@@ -32,8 +33,15 @@ class SubscriptionController {
             Response::error('Payment verification failed', 400);
         }
 
-        $limit = self::PLAN_LIMITS[$plan];
-        DB::query('UPDATE users SET plan = ?, ai_limit = ? WHERE id = ?', [$plan, $limit, $user['id']]);
+        $limit     = self::PLAN_LIMITS[$plan];
+        $expiresAt = date('c', strtotime('+30 days'));
+
+        DB::query(
+            'UPDATE users SET plan = ?, ai_limit = ?, subscription_expires_at = ? WHERE id = ?',
+            [$plan, $limit, $expiresAt, $user['id']]
+        );
+
+        MailService::sendSubscriptionConfirmed($user['email'], $user['name'], $plan);
 
         Response::json([
             'plan'     => $plan,

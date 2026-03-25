@@ -9,10 +9,14 @@ CREATE TABLE IF NOT EXISTS users (
     plan         VARCHAR(10)   NOT NULL DEFAULT 'free' CHECK (plan IN ('free','basic','pro')),
     ai_used      INTEGER       NOT NULL DEFAULT 0,
     ai_limit     INTEGER       NOT NULL DEFAULT 3,
-    push_token   VARCHAR(512),
-    ai_reset_at  TIMESTAMPTZ,
-    created_at   TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
-    updated_at   TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+    push_token                    VARCHAR(512),
+    ai_reset_at                   TIMESTAMPTZ,
+    email_verified_at             TIMESTAMPTZ,
+    email_verification_code       CHAR(6),
+    email_verification_expires_at TIMESTAMPTZ,
+    subscription_expires_at       TIMESTAMPTZ,
+    created_at                    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    updated_at                    TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS applications (
@@ -35,3 +39,21 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 );
 
 CREATE INDEX IF NOT EXISTS idx_rate_limits_expires ON rate_limits(expires_at);
+
+-- ── Seed: admin/pro account ───────────────────────────────────────────────────
+-- Runs only if the account doesn't exist yet (safe to re-run)
+INSERT INTO users (name, email, password, plan, ai_limit, email_verified_at, subscription_expires_at)
+VALUES (
+    'Frank',
+    'fradela39@gmail.com',
+    'PLACEHOLDER_SET_PASSWORD_VIA_REGISTER',
+    'pro',
+    9999,
+    NOW(),
+    NOW() + INTERVAL '365 days'
+)
+ON CONFLICT (email) DO UPDATE SET
+    plan                    = 'pro',
+    ai_limit                = 9999,
+    email_verified_at       = COALESCE(users.email_verified_at, NOW()),
+    subscription_expires_at = NOW() + INTERVAL '365 days';

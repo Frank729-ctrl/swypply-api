@@ -4,16 +4,22 @@ adminAuth();
 require_once __DIR__ . '/../api/lib/DB.php';
 
 $stats = [
-    'total_users'  => DB::find('SELECT COUNT(*) AS c FROM users')['c'],
-    'free_users'   => DB::find("SELECT COUNT(*) AS c FROM users WHERE plan = 'free'")['c'],
-    'basic_users'  => DB::find("SELECT COUNT(*) AS c FROM users WHERE plan = 'basic'")['c'],
-    'pro_users'    => DB::find("SELECT COUNT(*) AS c FROM users WHERE plan = 'pro'")['c'],
-    'total_apps'   => DB::find('SELECT COUNT(*) AS c FROM applications')['c'],
-    'apps_today'   => DB::find("SELECT COUNT(*) AS c FROM applications WHERE created_at::date = CURRENT_DATE")['c'],
-    'new_today'    => DB::find("SELECT COUNT(*) AS c FROM users WHERE created_at::date = CURRENT_DATE")['c'],
+    'total_users'    => DB::find('SELECT COUNT(*) AS c FROM users')['c'],
+    'verified'       => DB::find('SELECT COUNT(*) AS c FROM users WHERE email_verified_at IS NOT NULL')['c'],
+    'unverified'     => DB::find('SELECT COUNT(*) AS c FROM users WHERE email_verified_at IS NULL')['c'],
+    'free_users'     => DB::find("SELECT COUNT(*) AS c FROM users WHERE plan = 'free'")['c'],
+    'basic_users'    => DB::find("SELECT COUNT(*) AS c FROM users WHERE plan = 'basic'")['c'],
+    'pro_users'      => DB::find("SELECT COUNT(*) AS c FROM users WHERE plan = 'pro'")['c'],
+    'expiring_soon'  => DB::find("SELECT COUNT(*) AS c FROM users WHERE subscription_expires_at BETWEEN NOW() AND NOW() + INTERVAL '14 days'")['c'],
+    'total_apps'     => DB::find('SELECT COUNT(*) AS c FROM applications')['c'],
+    'apps_today'     => DB::find("SELECT COUNT(*) AS c FROM applications WHERE created_at::date = CURRENT_DATE")['c'],
+    'new_today'      => DB::find("SELECT COUNT(*) AS c FROM users WHERE created_at::date = CURRENT_DATE")['c'],
 ];
 
-$recent = DB::findAll('SELECT id, name, email, plan, ai_used, ai_limit, created_at FROM users ORDER BY created_at DESC LIMIT 10');
+$recent = DB::findAll(
+    'SELECT id, name, email, plan, ai_used, ai_limit, email_verified_at, subscription_expires_at, created_at
+     FROM users ORDER BY created_at DESC LIMIT 10'
+);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,9 +37,12 @@ $recent = DB::findAll('SELECT id, name, email, plan, ai_used, ai_limit, created_
   <div class="stats-grid">
     <div class="stat"><div class="stat-val"><?= $stats['total_users'] ?></div><div class="stat-lbl">Total Users</div></div>
     <div class="stat"><div class="stat-val"><?= $stats['new_today'] ?></div><div class="stat-lbl">New Today</div></div>
+    <div class="stat"><div class="stat-val green"><?= $stats['verified'] ?></div><div class="stat-lbl">Verified</div></div>
+    <div class="stat"><div class="stat-val red"><?= $stats['unverified'] ?></div><div class="stat-lbl">Unverified</div></div>
     <div class="stat"><div class="stat-val"><?= $stats['free_users'] ?></div><div class="stat-lbl">Free Plan</div></div>
     <div class="stat"><div class="stat-val orange"><?= $stats['basic_users'] ?></div><div class="stat-lbl">Basic Plan</div></div>
     <div class="stat"><div class="stat-val orange"><?= $stats['pro_users'] ?></div><div class="stat-lbl">Pro Plan</div></div>
+    <div class="stat"><div class="stat-val red"><?= $stats['expiring_soon'] ?></div><div class="stat-lbl">Expiring ≤14d</div></div>
     <div class="stat"><div class="stat-val"><?= $stats['total_apps'] ?></div><div class="stat-lbl">Applications</div></div>
     <div class="stat"><div class="stat-val"><?= $stats['apps_today'] ?></div><div class="stat-lbl">Applied Today</div></div>
   </div>
@@ -41,15 +50,37 @@ $recent = DB::findAll('SELECT id, name, email, plan, ai_used, ai_limit, created_
   <h2>Recent Sign-ups</h2>
   <div class="table-wrap">
   <table>
-    <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Plan</th><th>AI Used</th><th>Joined</th></tr></thead>
+    <thead>
+      <tr>
+        <th>#</th><th>Name</th><th>Email</th><th>Verified</th>
+        <th>Plan</th><th>AI Used</th><th>Expires</th><th>Joined</th>
+      </tr>
+    </thead>
     <tbody>
     <?php foreach ($recent as $u): ?>
     <tr>
       <td><?= $u['id'] ?></td>
       <td><?= htmlspecialchars($u['name']) ?></td>
       <td><?= htmlspecialchars($u['email']) ?></td>
+      <td>
+        <?php if ($u['email_verified_at']): ?>
+          <span style="color:#4ade80">✓</span>
+        <?php else: ?>
+          <span style="color:#f87171">✗</span>
+        <?php endif; ?>
+      </td>
       <td><span class="badge <?= $u['plan'] !== 'free' ? 'paid' : '' ?>"><?= $u['plan'] ?></span></td>
       <td><?= $u['ai_used'] ?> / <?= $u['ai_limit'] ?></td>
+      <td>
+        <?php if ($u['subscription_expires_at']):
+          $daysLeft = (int) ceil((strtotime($u['subscription_expires_at']) - time()) / 86400);
+          $color = $daysLeft <= 7 ? '#f87171' : ($daysLeft <= 14 ? '#fbbf24' : '#4ade80');
+        ?>
+          <span style="color:<?= $color ?>"><?= $daysLeft ?>d</span>
+        <?php else: ?>
+          <span style="color:#555">—</span>
+        <?php endif; ?>
+      </td>
       <td><?= date('d M Y', strtotime($u['created_at'])) ?></td>
     </tr>
     <?php endforeach; ?>

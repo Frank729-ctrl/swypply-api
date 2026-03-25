@@ -7,6 +7,8 @@ class RateLimit {
     private const RULES = [
         'login'    => [5,  15 * 60],  // 5 tries per 15 min
         'register' => [3,  60 * 60],  // 3 per hour
+        'verify'   => [10, 15 * 60], // 10 attempts per 15 min
+        'resend'   => [3,  15 * 60], // 3 resends per 15 min
         'admin'    => [5,  15 * 60],  // 5 per 15 min
         'api'      => [120, 60],      // 120 requests per minute (general)
     ];

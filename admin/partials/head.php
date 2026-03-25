@@ -14,6 +14,8 @@ h2 { font-size: 16px; font-weight: 600; margin: 32px 0 14px; color: #ccc; }
 .stat { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 20px 16px; }
 .stat-val { font-size: 28px; font-weight: 700; }
 .stat-val.orange { color: #f97316; }
+.stat-val.green  { color: #4ade80; }
+.stat-val.red    { color: #f87171; }
 .stat-lbl { font-size: 12px; color: #666; margin-top: 4px; }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }

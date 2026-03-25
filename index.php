@@ -110,7 +110,7 @@
 <section class="hero">
   <div class="hero-tag">🚀 AI-Powered Job Applications</div>
   <h1>Swipe your way to your <span>next job</span></h1>
-  <p>Swypply finds jobs, tailors your CV with AI, and applies for you — all with a simple swipe.</p>
+  <p>Swypply finds jobs, tailors your CV with AI, and applies for you all with a simple swipe.</p>
   <div class="hero-btns">
     <a href="#" class="btn-primary">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.27.06 2.15.67 2.9.69 1.1-.23 2.16-.9 3.37-.84 1.44.06 2.52.58 3.23 1.5-2.95 1.72-2.46 5.54.5 6.61-.6 1.54-1.37 3.06-2 3.92zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
@@ -131,7 +131,7 @@
     <div class="card">
       <div class="card-icon">💼</div>
       <h3>Thousands of Jobs</h3>
-      <p>Browse jobs from multiple sources — local and international — all in one feed.</p>
+      <p>Browse jobs from multiple sources — local and international all in one feed.</p>
     </div>
     <div class="card">
       <div class="card-icon">🤖</div>
